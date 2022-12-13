@@ -28,7 +28,14 @@ def gold_cat_toys
   # Sort the toys by name alphabetically.
 
   execute(<<-SQL)
-
+    SELECT
+      name
+    FROM
+      toys
+    WHERE
+      color = 'Gold' AND name LIKE '% %'
+    ORDER BY
+      name
   SQL
 end
 
@@ -39,7 +46,20 @@ def extra_jet_toys
   # Sort the toys by name alphabetically.
 
   execute(<<-SQL)
-
+    SELECT
+      toys.name, COUNT(*)
+    FROM
+      toys
+    JOIN
+      cat_toys ON toys.id = toy_id
+    JOIN
+      cats ON cats.id = cat_id
+    GROUP BY
+      cats.name, toys.name
+    HAVING
+      cats.name = 'Jet' AND COUNT(*) > 1
+    ORDER BY
+      toys.name ASC
   SQL
 end
 
@@ -49,7 +69,18 @@ def cats_with_a_lot
   # Sort the cats by cat name alphabetically.
 
   execute(<<-SQL)
-
+    SELECT
+      name
+    FROM
+      cats
+    JOIN
+      cat_toys ON cats.id = cat_id
+    GROUP BY
+      cats.id
+    HAVING
+      COUNT(*) > 7
+    ORDER BY
+      cats.name ASC
   SQL
 end
 
@@ -60,7 +91,21 @@ def just_like_orange
   # Order by cats name alphabetically.
 
   execute(<<-SQL)
-
+    SELECT
+      name, breed
+    FROM
+      cats
+    WHERE
+      breed IN(
+        SELECT
+          breed
+        FROM
+          cats
+        WHERE
+          name = 'Orange'
+      ) AND name != 'Orange'
+    ORDER BY
+      name ASC
   SQL
 end
 
@@ -71,6 +116,24 @@ def expensive_tastes
   # Sort by cat name alphabetically.
  
   execute(<<-SQL)
-
+    SELECT DISTINCT
+      cats.name, toys.name, toys.color
+    FROM
+      cats
+    JOIN
+      cat_toys ON cats.id = cat_id
+    JOIN
+      toys ON toys.id = toy_id
+    WHERE toys.id IN (
+      SELECT
+        id
+      FROM
+        toys
+      WHERE
+        name = 'Tiger'
+      ORDER BY
+        price DESC
+      LIMIT 1
+    )
   SQL
 end
